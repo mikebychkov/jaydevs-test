@@ -18,6 +18,6 @@ public class ScheduleService {
 
         log.info("CRON STOCK LOADING INIT...");
 
-        stockService.save(stockJsonService.getStocks());
+        stockJsonService.getStocks().forEach(stockService::save);
     }
 }

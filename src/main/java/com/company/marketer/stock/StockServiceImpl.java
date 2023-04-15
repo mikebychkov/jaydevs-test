@@ -13,18 +13,19 @@ public class StockServiceImpl implements StockService {
 
     private final StockRepository stockRepository;
 
+    private boolean stockNotExists(Stock stock) {
+
+        return !stockRepository.existsById(stock.getTimestamp())
+                .blockOptional()
+                .orElse(false);
+    }
+
     @Override
     public void save(List<Stock> stocks) {
 
-        stocks.forEach(stock -> {
-
-            boolean exists = stockRepository.existsById(stock.getTimestamp())
-                    .blockOptional()
-                    .orElse(false);
-            if (!exists) {
-                stockRepository.save(stock);
-            }
-        });
+        List<Stock> filteredStocks = stocks.stream().filter(this::stockNotExists).toList();
+        Flux<Stock> fluxStocks = Flux.fromIterable(filteredStocks);
+        stockRepository.saveAll(fluxStocks);
     }
 
     @Override
